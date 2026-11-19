@@ -1,0 +1,6 @@
+{% from "web/_macros.html" import icono_util %}
+<button type="button" class="boton-texto boton-util" aria-pressed="{{ 'true' if marcada else 'false' }}"
+        hx-post="/evaluaciones/{{ id_evaluacion }}/util" hx-swap="outerHTML"
+        title="{{ 'Quitar útil' if marcada else 'Marcar como útil' }}">
+  {{ icono_util() }} Útil · {{ total }}
+</button>

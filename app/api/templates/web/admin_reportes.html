@@ -1,0 +1,23 @@
+{% extends "web/base.html" %}
+{% set seccion = 'admin' %}
+{% block titulo %}Moderación{% endblock %}
+{% block contenido %}
+<div class="medio ancho-medio">
+  <div class="titulo-pagina">
+    <h1>Reportes de evaluaciones</h1>
+    <p>Revisa lo que reportaron los estudiantes y lo que detectó la moderación automática (lista de palabras y IA). Puedes publicar la evaluación o ocultarla. Nada se borra: las ocultas quedan en el historial.</p>
+  </div>
+
+  <nav class="pestanas" aria-label="Estado del reporte">
+    {% for clave, texto in [('pendiente', 'Pendientes'), ('revisado', 'Ocultadas'), ('descartado', 'Publicadas')] %}
+    <a href="/admin/reportes?estado={{ clave }}" class="{{ 'activa' if estado == clave }}" {% if estado == clave %}aria-current="page"{% endif %}>{{ texto }} ({{ conteo[clave] }})</a>
+    {% endfor %}
+  </nav>
+
+  {% for r in reportes %}
+    {% include "web/_tarjeta_reporte.html" %}
+  {% else %}
+  <p style="margin: 0; padding: 40px 0; text-align: center; color: var(--tenue)">No hay reportes en este estado.</p>
+  {% endfor %}
+</div>
+{% endblock %}

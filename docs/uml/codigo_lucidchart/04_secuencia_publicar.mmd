@@ -1,0 +1,57 @@
+---
+title: EvalDoc - Diagrama de secuencia - Publicar evaluación con moderación
+---
+sequenceDiagram
+    autonumber
+    actor E as Estudiante
+    participant N as Navegador (Jinja2 + HTMX)
+    participant W as web_router (FastAPI)
+    participant S as EvaluacionService
+    participant RD as DocenteRepository
+    participant RC as CatalogoRepository
+    participant RE as EvaluacionRepository
+    participant M as ModeracionService
+    participant P as ModeradorPalabras
+    participant G as ModeradorIA / Gemini
+    participant RR as ReporteRepository
+
+    E->>N: Llena materia, estrellas y comentario
+    N->>W: POST /docentes/{id}/evaluar (cookie con JWT)
+    W->>W: Leer sesión del token
+    W->>S: crear(sesion, id_docente, id_materia, puntaje, comentario)
+    S->>RD: obtener(id_docente)
+    RD-->>S: Docente con materias
+    S->>RC: obtener_materia(id_materia)
+    RC-->>S: Materia
+    S->>S: docente.dicta(id_materia)
+    S->>RE: existe(id_usuario, id_docente, id_materia)
+    RE-->>S: false
+    S->>S: Evaluacion(...) valida reglas de negocio
+    S->>M: revisar(comentario)
+    M->>P: revisar(comentario)
+    alt Contiene palabra prohibida
+        P-->>M: bloqueado
+    else No contiene
+        P-->>M: permitido
+        M->>G: revisar(comentario)
+        alt Gemini responde
+            G-->>M: permitido / dudoso / bloqueado
+        else Error, límite o timeout
+            G--xM: excepción
+            M->>M: dudoso (revisión humana)
+        end
+    end
+    M-->>S: ResultadoModeracion
+    S->>S: aplicar_moderacion (bloqueado → en_revision)
+    S->>RE: guardar(evaluacion)
+    RE-->>S: Evaluacion con id
+    opt Veredicto dudoso o bloqueado
+        S->>RR: guardar(Reporte origen ia)
+    end
+    S-->>W: Evaluacion
+    alt Estado publicada
+        W-->>N: 303 → perfil?aviso=publicada
+    else Estado en_revision
+        W-->>N: 303 → perfil?aviso=en_revision
+    end
+    N-->>E: Muestra el aviso y el perfil actualizado

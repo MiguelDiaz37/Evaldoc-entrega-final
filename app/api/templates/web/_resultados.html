@@ -1,0 +1,42 @@
+{% from "web/_macros.html" import estrellas, paginacion as paginar %}
+{% set textos_orden = {'mejor': 'mejor calificación', 'peor': 'peor calificación', 'nombre': 'nombre'} %}
+<div class="resumen">
+  <p style="margin: 0"><strong>{{ paginacion.total }} {{ 'docente' if paginacion.total == 1 else 'docentes' }}</strong> · ordenados por {{ textos_orden[orden] }}{% if paginacion.total_paginas > 1 %} · página {{ paginacion.pagina }} de {{ paginacion.total_paginas }}{% endif %}</p>
+  <p id="cargando" class="cargando" style="margin: 0">Buscando…</p>
+</div>
+
+<section class="rejilla" aria-label="Resultados">
+  {% for d in docentes %}
+  {% set publicadas = d.publicadas | length %}
+  <a class="tarjeta docente" href="/docentes/{{ d.id_docente }}">
+    <div class="docente-cabeza">
+      <span class="avatar" aria-hidden="true">{{ d.nombre | iniciales }}</span>
+      <span>
+        <span class="docente-nombre">{{ d.nombre }}</span><br>
+        <span class="docente-detalle">
+          {% if publicadas == 0 %}Aún no tiene evaluaciones{% else %}{{ publicadas }} {{ 'evaluación' if publicadas == 1 else 'evaluaciones' }}{% endif %}
+        </span>
+      </span>
+    </div>
+    <div class="nota-linea">
+      {{ estrellas(d.calificacion_promedio, 20) }}
+      {% if d.calificacion_promedio %}
+        <b>{{ '%.1f' % d.calificacion_promedio }}</b>
+        <span class="tenue">({{ d.total_calificaciones }} {{ 'calificación' if d.total_calificaciones == 1 else 'calificaciones' }})</span>
+      {% else %}
+        <b>Sin calificar</b>
+      {% endif %}
+    </div>
+    <div class="chips">
+      {% for m in d.materias %}<span class="chip">{{ m.nombre }}</span>{% endfor %}
+    </div>
+  </a>
+  {% else %}
+  <div class="vacio">
+    <h2>No encontramos docentes</h2>
+    <p>Prueba con otro nombre o quita algún filtro.</p>
+    <a class="boton boton-secundario" href="/">Ver todos</a>
+  </div>
+  {% endfor %}
+</section>
+{{ paginar(paginacion, url_pagina, htmx=True) }}

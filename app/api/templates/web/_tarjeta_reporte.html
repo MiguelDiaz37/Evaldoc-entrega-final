@@ -1,0 +1,35 @@
+{% from "web/_macros.html" import estrellas %}
+<article class="tarjeta reporte" id="reporte-{{ r.id_reporte }}">
+  <div class="meta">
+    <span class="categoria">{{ r.nombre_categoria }}</span>
+    {% if r.por_ia %}<span class="por-ia">Detección automática</span>{% endif %}
+    {% if r.evaluacion.estado == 'en_revision' %}<span class="estado estado-en_revision">Oculta mientras se revisa</span>{% endif %}
+    <span style="font-size: 13px; color: var(--tenue)">{{ r.fecha | fecha_corta }}</span>
+  </div>
+  <p class="razon"><strong style="color: var(--texto)">Razón:</strong> {{ r.motivo }}</p>
+  <blockquote>
+    <div class="evaluacion-meta" style="font-size: 14px">
+      <a href="/docentes/{{ r.evaluacion.id_docente }}" style="font-weight: 600; text-decoration: none; color: var(--texto)">{{ r.nombre_docente }}</a>
+      <span class="chip">{{ r.evaluacion.nombre_materia }}</span>
+      {% if r.evaluacion.puntaje %}{{ estrellas(r.evaluacion.puntaje, 16) }}{% else %}<span style="color: var(--tenue)">Solo comentario</span>{% endif %}
+    </div>
+    <p class="cita">“{{ r.evaluacion.comentario or 'Sin comentario' }}”</p>
+  </blockquote>
+  {% if r.estado == 'pendiente' %}
+  <form class="fila-botones" hx-post="/admin/reportes/{{ r.id_reporte }}/resolver" hx-target="#reporte-{{ r.id_reporte }}" hx-swap="outerHTML">
+    <button class="boton boton-secundario" type="submit" name="accion" value="publicar">
+      {{ 'Aprobar y publicar' if r.evaluacion.estado == 'en_revision' else 'Mantener publicada' }}
+    </button>
+    <button class="boton boton-rojo" type="submit" name="accion" value="ocultar">Ocultar evaluación</button>
+  </form>
+  {% else %}
+  <p class="resultado">
+    {{ 'La evaluación quedó oculta' if r.estado == 'revisado' else 'La evaluación quedó publicada' }}
+    {%- if r.correo_moderador %} · por {{ r.correo_moderador }}{% elif r.fecha_resolucion %} · automáticamente (el estudiante corrigió el comentario){% endif %}
+    {%- if r.fecha_resolucion %} · {{ r.fecha_resolucion | fecha_corta }} {{ r.fecha_resolucion.strftime('%H:%M') }}{% endif %}
+  </p>
+  {% endif %}
+</article>
+{% if recien_resuelto %}
+<span id="contador-pendientes" class="insignia" hx-swap-oob="true" {% if not pendientes %}hidden{% endif %}>{{ pendientes }}</span>
+{% endif %}

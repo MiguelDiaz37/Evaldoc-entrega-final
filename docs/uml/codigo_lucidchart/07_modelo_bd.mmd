@@ -1,0 +1,78 @@
+---
+title: EvalDoc - Modelo relacional (PostgreSQL)
+---
+erDiagram
+    USUARIO {
+        int id_usuario PK
+        varchar correo_institucional UK
+        varchar rol "estudiante | admin"
+        date fecha_registro
+    }
+    CODIGO_OTP {
+        int id_codigo PK
+        int id_usuario FK
+        varchar codigo_hash "bcrypt"
+        datetime creado
+        datetime expira
+        int intentos
+        bool usado
+    }
+    FACULTAD {
+        int id_facultad PK
+        varchar nombre UK
+    }
+    MATERIA {
+        int id_materia PK
+        varchar nombre
+        int id_facultad FK
+    }
+    DOCENTE {
+        int id_docente PK
+        varchar nombre
+        varchar foto_perfil "nulo"
+    }
+    DOCENTE_MATERIA {
+        int id_docente PK, FK
+        int id_materia PK, FK
+    }
+    EVALUACION {
+        int id_evaluacion PK
+        int id_usuario FK
+        int id_docente FK
+        int id_materia FK
+        smallint puntaje "1 a 5 o nulo"
+        varchar comentario "max 500 o nulo"
+        date fecha
+        varchar estado "publicada | en_revision | oculta"
+        datetime fecha_edicion "nulo"
+    }
+    VOTO_UTIL {
+        int id_usuario PK, FK
+        int id_evaluacion PK, FK
+        datetime fecha
+    }
+    REPORTE {
+        int id_reporte PK
+        int id_evaluacion FK
+        int id_usuario FK "nulo si origen ia"
+        varchar categoria
+        varchar origen "usuario | ia"
+        varchar motivo "10 a 300"
+        varchar estado "pendiente | revisado | descartado"
+        date fecha
+        int resuelto_por FK "nulo"
+        datetime fecha_resolucion "nulo"
+    }
+
+    USUARIO ||--o{ CODIGO_OTP : solicita
+    USUARIO ||--o{ EVALUACION : escribe
+    USUARIO ||--o{ VOTO_UTIL : vota
+    USUARIO |o--o{ REPORTE : reporta
+    USUARIO |o--o{ REPORTE : resuelve
+    FACULTAD ||--|{ MATERIA : agrupa
+    DOCENTE ||--o{ DOCENTE_MATERIA : dicta
+    MATERIA ||--o{ DOCENTE_MATERIA : es_dictada
+    DOCENTE ||--o{ EVALUACION : recibe
+    MATERIA ||--o{ EVALUACION : contexto
+    EVALUACION ||--o{ VOTO_UTIL : recibe
+    EVALUACION ||--o{ REPORTE : tiene

@@ -1,0 +1,46 @@
+{% extends "web/base.html" %}
+{% from "web/_macros.html" import estrellas, fecha_evaluacion %}
+{% set seccion = 'mias' %}
+{% block titulo %}Mis evaluaciones{% endblock %}
+{% block contenido %}
+<div class="medio">
+  <div class="titulo-pagina">
+    <h1>Mis evaluaciones</h1>
+    <p>Solo tú ves esta lista. En los perfiles aparecen como “Estudiante anónimo”.</p>
+  </div>
+
+  {% for e in evaluaciones %}
+  <article class="tarjeta mi-evaluacion">
+    <div class="cuerpo">
+      <div class="evaluacion-meta">
+        <a href="/docentes/{{ e.id_docente }}" style="font-weight: 600; font-size: 17px; text-decoration: none; color: var(--texto)">{{ e.nombre_docente }}</a>
+        <span class="chip">{{ e.nombre_materia }}</span>
+        {% if e.estado == 'en_revision' %}<span class="estado estado-en_revision">En revisión</span>{% endif %}
+        {% if e.estado == 'oculta' %}<span class="estado estado-oculta">Oculta por un moderador</span>{% endif %}
+      </div>
+      <div class="evaluacion-meta">
+        {% if e.puntaje %}{{ estrellas(e.puntaje) }}{% endif %}
+        <span style="font-size: 13px; color: var(--tenue)">{{ fecha_evaluacion(e) }} · {{ e.utiles }} {{ 'persona la encontró útil' if e.utiles == 1 else 'personas la encontraron útil' }}</span>
+      </div>
+      <p class="texto" style="margin: 0; line-height: 1.6; color: #2B3240; white-space: pre-line; overflow-wrap: anywhere">{{ e.comentario or 'Sin comentario.' }}</p>
+    </div>
+    <div class="botones">
+      {% if e.estado != 'oculta' %}
+      <a class="boton boton-secundario" href="/evaluaciones/{{ e.id_evaluacion }}/editar">Editar</a>
+      {% endif %}
+      <form method="post" action="/evaluaciones/{{ e.id_evaluacion }}/eliminar"
+            onsubmit="return confirm('¿Eliminar esta evaluación? No se puede deshacer.')">
+        <button class="boton boton-peligro" type="submit">Eliminar</button>
+      </form>
+    </div>
+  </article>
+  {% else %}
+  <section class="vacio">
+    <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#98A1B0" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+    <h2>Aún no has evaluado a ningún docente</h2>
+    <p>Busca a un docente que hayas tenido este semestre y cuéntale a otros cómo te fue.</p>
+    <a class="boton boton-primario" href="/">Buscar docentes</a>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

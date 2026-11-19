@@ -1,0 +1,58 @@
+
+{% macro estrellas(valor, tam=18) -%}
+{%- set llenas = (valor or 0) | round | int -%}
+<span class="estrellas" role="img" aria-label="{{ '%.1f' % valor if valor else 'Sin' }} de 5 estrellas">
+  {%- for i in range(1, 6) %}
+  <svg aria-hidden="true" width="{{ tam }}" height="{{ tam }}" viewBox="0 0 24 24" class="{{ 'estrella-llena' if i <= llenas else 'estrella-vacia' }}" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+  {%- endfor %}
+</span>
+{%- endmacro %}
+
+{% macro estrella_sola(tam=13) -%}
+<svg aria-hidden="true" width="{{ tam }}" height="{{ tam }}" viewBox="0 0 24 24" class="estrella-llena" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+{%- endmacro %}
+
+{% macro icono_util() -%}
+<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11H4V10zM7 10l4-7c1.7 0 2.5 1 2.2 2.6L12.6 9H19a2 2 0 012 2.3l-1.3 7.6A2.5 2.5 0 0117.2 21H7"/></svg>
+{%- endmacro %}
+
+{% macro icono_volver() -%}
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+{%- endmacro %}
+
+{% macro aviso(tipo, texto) -%}
+<div class="aviso aviso-{{ tipo }}" role="{{ 'alert' if tipo in ('error', 'alerta') else 'status' }}">
+  {% if tipo == 'ok' %}
+  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>
+  {% elif tipo == 'alerta' %}
+  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>
+  {% else %}
+  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+  {% endif %}
+  <span>{{ texto }}</span>
+</div>
+{%- endmacro %}
+
+{% macro fecha_evaluacion(e) -%}
+{{ e.fecha | fecha_corta }}{% if e.editada %} <span class="editado" title="Editada el {{ e.fecha_edicion | fecha_corta }}">· editado</span>{% endif %}
+{%- endmacro %}
+
+{% macro paginacion(p, url, htmx=False) -%}
+{% if p.total_paginas > 1 %}
+<nav class="paginacion" aria-label="Paginación">
+  {% if p.anterior %}
+  <a class="boton boton-secundario" href="{{ url }}{{ p.anterior }}" {% if htmx %}hx-get="{{ url }}{{ p.anterior }}" hx-target="#resultados" hx-push-url="true"{% endif %}>← Anterior</a>
+  {% endif %}
+  {% for n in range(1, p.total_paginas + 1) %}
+    {% if n == p.pagina %}
+    <span class="pagina-actual" aria-current="page">{{ n }}</span>
+    {% else %}
+    <a class="pagina-num" href="{{ url }}{{ n }}" aria-label="Página {{ n }}" {% if htmx %}hx-get="{{ url }}{{ n }}" hx-target="#resultados" hx-push-url="true"{% endif %}>{{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if p.siguiente %}
+  <a class="boton boton-secundario" href="{{ url }}{{ p.siguiente }}" {% if htmx %}hx-get="{{ url }}{{ p.siguiente }}" hx-target="#resultados" hx-push-url="true"{% endif %}>Siguiente →</a>
+  {% endif %}
+</nav>
+{% endif %}
+{%- endmacro %}

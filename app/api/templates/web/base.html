@@ -1,0 +1,59 @@
+{% from "web/_macros.html" import aviso as caja_aviso %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}EvalDoc{% endblock %} · EvalDoc UMB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/estilos.css">
+  <script src="/static/js/htmx.min.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <div class="contenedor">
+      <a class="marca" href="/">
+        <span class="marca-logo" aria-hidden="true">E</span>
+        <span class="marca-texto">
+          <span class="marca-nombre">EvalDoc</span>
+          <span class="marca-sub">UMB · Facultad de Ingenierías</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav-enlace {{ 'activo' if seccion == 'docentes' }}" href="/">Docentes</a>
+        {% if sesion %}
+          <a class="nav-enlace {{ 'activo' if seccion == 'mias' }}" href="/mis-evaluaciones">Mis evaluaciones</a>
+          {% if sesion.es_admin %}
+            <a class="nav-enlace {{ 'activo' if seccion == 'admin' }}" href="/admin/reportes">Moderación
+              <span id="contador-pendientes" class="insignia" {% if not pendientes %}hidden{% endif %}>{{ pendientes }}</span></a>
+          {% endif %}
+          <form class="usuario" method="post" action="/salir">
+            <span>{{ 'Administrador' if sesion.es_admin else 'Estudiante anónimo' }}</span>
+            <button type="submit">Salir</button>
+          </form>
+        {% else %}
+          <a class="boton boton-primario" href="/login?siguiente={{ request.url.path | urlencode }}">Iniciar sesión</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% if aviso %}
+    <div class="contenedor zona-aviso">{{ caja_aviso(aviso[0], aviso[1]) }}</div>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <span>EvalDoc · Proyecto de Taller de Programación · Universidad Manuela Beltrán</span>
+      <span><a href="/normas">Normas de la comunidad</a> · <a href="/privacidad">Privacidad</a> · <a href="/docs">API</a></span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

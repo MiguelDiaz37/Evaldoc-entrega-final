@@ -1,0 +1,31 @@
+# Palabras que bloquean un comentario de inmediato (una por linea).
+# Se comparan como palabras completas, sin tildes ni mayusculas.
+# Lo que no este aqui lo revisa la IA.
+idiota
+imbecil
+estupido
+estupida
+pendejo
+pendeja
+marica
+malparido
+malparida
+hijueputa
+hp
+gonorrea
+perra
+puta
+puto
+mierda
+cabron
+cabrona
+hdp
+gonorreo
+huevon
+guevon
+careverga
+caremonda
+zorra
+retrasado
+retrasada
+subnormal

@@ -1,0 +1,44 @@
+---
+title: EvalDoc - Diagrama de casos de uso
+---
+flowchart LR
+    VIS(["Visitante"])
+    EST(["Estudiante UMB"])
+    ADM(["Administrador / Moderador"])
+    COR["«sistema externo» Servidor de correo"]
+    GEM["«sistema externo» Gemini (IA)"]
+
+    subgraph SIS["Sistema EvalDoc"]
+        UC1(["Buscar y filtrar docentes"])
+        UC2(["Consultar perfil del docente"])
+        UC12(["Consultar normas y privacidad"])
+        UC3(["Iniciar sesión con código OTP"])
+        UC4(["Calificar y/o comentar docente"])
+        UC5(["Editar o eliminar evaluación propia"])
+        UC6(["Marcar evaluación como Útil"])
+        UC7(["Reportar evaluación"])
+        UC8(["Consultar mis evaluaciones"])
+        UC9(["Moderar comentario automáticamente"])
+        UC15(["Gestionar docentes"])
+        UC10(["Revisar reportes"])
+        UC11(["Publicar u ocultar evaluación"])
+    end
+
+    VIS --- UC1
+    VIS --- UC2
+    VIS --- UC12
+    VIS --- UC3
+    EST --- UC4
+    EST --- UC5
+    EST --- UC6
+    EST --- UC7
+    EST --- UC8
+    ADM --- UC15
+    ADM --- UC10
+    EST -->|generalización| VIS
+    ADM -->|generalización| EST
+    UC4 -.->|«include»| UC9
+    UC5 -.->|«include»| UC9
+    UC10 -.->|«include»| UC11
+    UC3 --- COR
+    UC9 --- GEM

@@ -1,0 +1,23 @@
+{% from "web/_macros.html" import aviso %}
+<form class="form-reporte" hx-post="/evaluaciones/{{ id_evaluacion }}/reportar" hx-target="this" hx-swap="outerHTML">
+  {% if error %}{{ aviso('error', error) }}{% endif %}
+  <div>
+    <label class="etiqueta" for="categoria-{{ id_evaluacion }}">Tipo de problema</label>
+    <select class="campo" id="categoria-{{ id_evaluacion }}" name="categoria">
+      {% for clave, texto in categorias.items() %}
+      <option value="{{ clave }}" {{ 'selected' if clave == categoria }}>{{ texto }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="etiqueta" for="razon-{{ id_evaluacion }}">Explica la razón <span class="requerido">*</span></label>
+    <textarea class="campo" id="razon-{{ id_evaluacion }}" name="motivo" rows="3" required
+              minlength="{{ min_razon }}" maxlength="{{ max_razon }}" data-contador data-minimo="{{ min_razon }}"
+              placeholder="Cuéntale al moderador qué tiene de malo esta evaluación">{{ motivo }}</textarea>
+    <div class="contador" aria-live="polite"><span data-cuenta>{{ motivo | length }}</span> / {{ max_razon }} · mínimo {{ min_razon }}</div>
+  </div>
+  <div class="fila-botones">
+    <button type="button" class="boton boton-secundario" hx-on:click="this.closest('form').remove()">Cancelar</button>
+    <button type="submit" class="boton boton-primario" data-envio {{ 'disabled' if motivo | length < min_razon }}>Enviar reporte</button>
+  </div>
+</form>

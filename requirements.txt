@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg[binary]
+python-dotenv
+python-multipart
+bcrypt
+PyJWT
+google-genai
+httpx
+jinja2
+pytest

@@ -1,0 +1,109 @@
+{% extends "web/base.html" %}
+{% from "web/_macros.html" import estrellas, estrella_sola, icono_volver, fecha_evaluacion, paginacion as paginar %}
+{% set seccion = 'docentes' %}
+{% block titulo %}{{ docente.nombre }}{% endblock %}
+{% block contenido %}
+<div class="contenedor">
+  <a class="volver" href="/">{{ icono_volver() }} Volver a docentes</a>
+
+  <section class="tarjeta perfil-cabeza">
+    <div class="perfil-quien">
+      <span class="avatar grande" aria-hidden="true">{{ docente.nombre | iniciales }}</span>
+      <div>
+        <h1>{{ docente.nombre }}</h1>
+        <p>{{ docente.materias[0].nombre_facultad if docente.materias else '' }}</p>
+        <div class="chips">{% for m in docente.materias %}<span class="chip">{{ m.nombre }}</span>{% endfor %}</div>
+      </div>
+    </div>
+    <div class="perfil-nota">
+      {% if docente.calificacion_promedio %}
+      <div style="display: flex; align-items: baseline; gap: 10px">
+        <span class="grande">{{ '%.1f' % docente.calificacion_promedio }}</span>
+        <span style="color: var(--tenue)">de 5 · {{ docente.total_calificaciones }} {{ 'calificación' if docente.total_calificaciones == 1 else 'calificaciones' }}</span>
+      </div>
+      {{ estrellas(docente.calificacion_promedio, 26) }}
+      {% else %}
+      <span class="grande" style="font-size: 28px">Sin calificar</span>
+      <span style="color: var(--tenue); font-size: 14px">Sé el primero en calificar a este docente.</span>
+      {% endif %}
+      <a class="boton boton-primario" href="/docentes/{{ docente.id_docente }}/evaluar">Evaluar a este docente</a>
+    </div>
+  </section>
+
+  <div class="perfil-cuerpo">
+    <aside class="tarjeta distribucion" aria-label="Distribución de calificaciones">
+      <h2>Calificaciones</h2>
+      {% set total = docente.total_calificaciones %}
+      {% for k, n in docente.distribucion.items() %}
+      <div class="fila-dist" role="img" aria-label="{{ k }} estrellas: {{ n }}">
+        <span class="valor">{{ k }}{{ estrella_sola() }}</span>
+        <span class="barra"><span style="width: {{ (n / total * 100) | round | int if total else 0 }}%"></span></span>
+        <span class="n">{{ n }}</span>
+      </div>
+      {% endfor %}
+    </aside>
+
+    <section class="lista-evaluaciones" aria-label="Evaluaciones">
+      <div class="lista-cabeza">
+        <h2>Evaluaciones ({{ total_visibles }})</h2>
+        <form class="filtros-perfil" method="get" action="/docentes/{{ docente.id_docente }}">
+          {% if docente.materias | length > 1 %}
+          <label>Materia
+            <select class="campo" name="materia" onchange="this.form.submit()">
+              <option value="">Todas</option>
+              {% for m in docente.materias %}
+              <option value="{{ m.id_materia }}" {{ 'selected' if m.id_materia == materia }}>{{ m.nombre }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          {% endif %}
+          <label>Ordenar
+            <select class="campo" name="orden" onchange="this.form.submit()">
+              <option value="utiles" {{ 'selected' if orden == 'utiles' }}>Más útiles</option>
+              <option value="recientes" {{ 'selected' if orden == 'recientes' }}>Más recientes</option>
+            </select>
+          </label>
+          <noscript><button class="boton boton-secundario" type="submit">Aplicar</button></noscript>
+        </form>
+      </div>
+
+      {% for e in evaluaciones %}
+      {% set mia = id_usuario and e.id_usuario == id_usuario %}
+      <article class="tarjeta evaluacion {{ 'mia' if mia }}" id="evaluacion-{{ e.id_evaluacion }}">
+        <div class="evaluacion-meta">
+          {% if mia %}<span class="etiqueta-mia">Tu evaluación</span>{% endif %}
+          {% if e.puntaje %}{{ estrellas(e.puntaje) }}{% else %}<span style="font-size: 13px; color: var(--tenue)">Solo comentario</span>{% endif %}
+          <span class="chip">{{ e.nombre_materia }}</span>
+          <span class="fecha">{{ fecha_evaluacion(e) }}</span>
+        </div>
+        {% if e.comentario %}<p class="texto">{{ e.comentario }}</p>{% endif %}
+        <div class="acciones-evaluacion">
+          {% if mia %}
+            <span class="conteo-util">{{ e.utiles }} {{ 'persona la encontró útil' if e.utiles == 1 else 'personas la encontraron útil' }}</span>
+            <span class="espacio"></span>
+            <a class="boton-texto" style="color: var(--azul-enlace)" href="/evaluaciones/{{ e.id_evaluacion }}/editar">Editar</a>
+          {% else %}
+            {% with id_evaluacion=e.id_evaluacion, marcada=(e.id_evaluacion in utiles), total=e.utiles %}
+              {% include "web/_boton_util.html" %}
+            {% endwith %}
+            <span class="espacio"></span>
+            <button type="button" class="boton-texto" hx-get="/evaluaciones/{{ e.id_evaluacion }}/reportar"
+                    hx-target="#reporte-{{ e.id_evaluacion }}">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h11l-1.5 4L15 12H4"/></svg>
+              Reportar
+            </button>
+          {% endif %}
+        </div>
+        <div id="reporte-{{ e.id_evaluacion }}"></div>
+      </article>
+      {% else %}
+      <div class="vacio" style="padding: 32px">
+        <h2>Todavía no hay evaluaciones</h2>
+        <p>Si tuviste a este docente, cuéntales a otros cómo te fue.</p>
+      </div>
+      {% endfor %}
+      {{ paginar(paginacion, url_pagina) }}
+    </section>
+  </div>
+</div>
+{% endblock %}

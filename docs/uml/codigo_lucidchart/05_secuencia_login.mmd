@@ -1,0 +1,43 @@
+---
+title: EvalDoc - Diagrama de secuencia - Iniciar sesión con código OTP
+---
+sequenceDiagram
+    autonumber
+    actor E as Estudiante
+    participant W as web_router
+    participant C as CuentaService
+    participant U as UsuarioRepository
+    participant H as BcryptHasher
+    participant M as Correo (SMTP)
+    participant T as JwtTokens
+
+    E->>W: POST /login (correo)
+    W->>C: solicitar_codigo(correo)
+    C->>C: normalizar_correo (solo @academia.umb.edu.co)
+    C->>U: por_correo(correo)
+    alt Correo nuevo
+        C->>U: guardar(Usuario)
+    end
+    C->>U: ultimo_codigo / contar_codigos_desde
+    alt Menos de 1 minuto o más de 5 por hora
+        C-->>W: DemasiadosIntentos
+        W-->>E: 429 "Espera ... segundos"
+    else Dentro del límite
+        C->>H: hashear(código de 6 dígitos)
+        C->>U: guardar_codigo(hash, expira en 10 min)
+        C->>M: enviar_codigo(correo, código)
+        W-->>E: Paso 2: escribir el código
+    end
+    E->>W: POST /login/verificar (correo, código)
+    W->>C: verificar_codigo(correo, código)
+    C->>U: ultimo_codigo(id_usuario)
+    C->>H: verificar(código, hash)
+    alt Código correcto y vigente
+        C->>U: marcar usado
+        C->>T: crear(Sesion id y rol, sin correo)
+        T-->>C: JWT (120 días)
+        W-->>E: Cookie httponly + redirección
+    else Incorrecto
+        C->>U: intentos + 1
+        W-->>E: 401 "El código no es correcto" (bloqueo a los 5)
+    end

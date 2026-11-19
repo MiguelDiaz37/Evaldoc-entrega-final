@@ -1,0 +1,11 @@
+{% extends "web/base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<div class="medio">
+  <section class="vacio">
+    <h2>{{ titulo }}</h2>
+    <p>{{ mensaje }}</p>
+    <a class="boton boton-primario" href="/">Ir al inicio</a>
+  </section>
+</div>
+{% endblock %}

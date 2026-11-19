@@ -1,0 +1,228 @@
+---
+title: EvalDoc - Diagrama de clases (casos de uso y puertos)
+---
+classDiagram
+    direction TB
+    class CuentaService {
+        -UsuarioRepository repo
+        -Hasher hasher
+        -GestorTokens tokens
+        -EnviadorCorreo correo
+        -list dominios
+        -int minutos_otp
+        +solicitar_codigo(correo) str
+        +verificar_codigo(correo, codigo) str
+        -revisar_limite(id_usuario, ahora)
+    }
+    class DocenteService {
+        -DocenteRepository repo
+        +listar(nombre, id_facultad, id_materia, orden) list
+        +obtener(id_docente) Docente
+        +crear(nombre, foto_perfil) Docente
+        +eliminar(id_docente)
+    }
+    class EvaluacionService {
+        -EvaluacionRepository evaluaciones
+        -DocenteRepository docentes
+        -CatalogoRepository catalogo
+        -ReporteRepository reportes
+        -Moderador moderador
+        +crear(sesion, id_docente, id_materia, puntaje, comentario) Evaluacion
+        +editar(sesion, id_evaluacion, puntaje, comentario) Evaluacion
+        +eliminar(sesion, id_evaluacion)
+        +alternar_util(sesion, id_evaluacion) tuple
+        +mias(sesion) list
+    }
+    class ReporteService {
+        -ReporteRepository reportes
+        -EvaluacionRepository evaluaciones
+        +reportar(sesion, id_evaluacion, categoria, motivo) Reporte
+        +listar(sesion, estado) list
+        +resolver(sesion, id_reporte, accion) Reporte
+        +contar_pendientes(sesion) int
+    }
+    class UsuarioRepository {
+        <<interface>>
+        +por_correo(correo) Usuario
+        +guardar(usuario) Usuario
+        +ultimo_codigo(id_usuario) CodigoOtp
+        +guardar_codigo(codigo) CodigoOtp
+        +contar_codigos_desde(id_usuario, desde) int
+    }
+    class EnviadorCorreo {
+        <<interface>>
+        +enviar_codigo(correo, codigo)
+    }
+    class GestorTokens {
+        <<interface>>
+        +crear(sesion) str
+        +leer(token) Sesion
+    }
+    class Hasher {
+        <<interface>>
+        +hashear(texto) str
+        +verificar(texto, hash_guardado) bool
+    }
+    class DocenteRepository {
+        <<interface>>
+        +listar(id_facultad, id_materia) list
+        +obtener(id_docente) Docente
+        +guardar(docente) Docente
+        +eliminar(id_docente)
+    }
+    class CatalogoRepository {
+        <<interface>>
+        +listar_facultades() list
+        +listar_materias(id_facultad) list
+        +obtener_materia(id_materia) Materia
+    }
+    class EvaluacionRepository {
+        <<interface>>
+        +obtener(id_evaluacion) Evaluacion
+        +existe(id_usuario, id_docente, id_materia) bool
+        +listar_por_usuario(id_usuario) list
+        +guardar(evaluacion) Evaluacion
+        +eliminar(id_evaluacion)
+        +marco_util(id_usuario, id_evaluacion) bool
+        +marcar_util(id_usuario, id_evaluacion)
+        +quitar_util(id_usuario, id_evaluacion)
+    }
+    class ReporteRepository {
+        <<interface>>
+        +obtener(id_reporte) Reporte
+        +existe(id_usuario, id_evaluacion) bool
+        +listar(estado) list
+        +pendientes_de(id_evaluacion) list
+        +guardar(reporte) Reporte
+    }
+    class Moderador {
+        <<interface>>
+        +revisar(texto) ResultadoModeracion
+    }
+    class CorreoSmtp {
+        -str servidor
+        -int puerto
+        -str usuario
+        -str remitente
+        +enviar_codigo(correo, codigo)
+    }
+    class CorreoConsola {
+        +enviar_codigo(correo, codigo)
+    }
+    class JwtTokens {
+        -str secreto
+        -int dias
+        +crear(sesion) str
+        +leer(token) Sesion
+    }
+    class BcryptHasher {
+        +hashear(texto) str
+        +verificar(texto, hash_guardado) bool
+    }
+    class SqlAlchemyEvaluacionRepository {
+        -Session db
+        +obtener(id_evaluacion) Evaluacion
+        +existe(id_usuario, id_docente, id_materia) bool
+        +listar_por_usuario(id_usuario) list
+        +guardar(evaluacion) Evaluacion
+        +eliminar(id_evaluacion)
+        +marco_util(id_usuario, id_evaluacion) bool
+        +marcar_util(id_usuario, id_evaluacion)
+        +quitar_util(id_usuario, id_evaluacion)
+    }
+    class SqlAlchemyReporteRepository {
+        -Session db
+        +obtener(id_reporte) Reporte
+        +existe(id_usuario, id_evaluacion) bool
+        +listar(estado) list
+        +pendientes_de(id_evaluacion) list
+        +guardar(reporte) Reporte
+    }
+    class SqlAlchemyDocenteRepository {
+        -Session db
+        +listar(id_facultad, id_materia) list
+        +obtener(id_docente) Docente
+        +guardar(docente) Docente
+        +eliminar(id_docente)
+    }
+    class SqlAlchemyCatalogoRepository {
+        -Session db
+        +listar_facultades() list
+        +listar_materias(id_facultad) list
+        +obtener_materia(id_materia) Materia
+    }
+    class SqlAlchemyUsuarioRepository {
+        -Session db
+        +por_correo(correo) Usuario
+        +guardar(usuario) Usuario
+        +ultimo_codigo(id_usuario) CodigoOtp
+        +guardar_codigo(codigo) CodigoOtp
+        +contar_codigos_desde(id_usuario, desde) int
+    }
+    class ModeracionService {
+        -Moderador palabras
+        -Moderador ia
+        +revisar(texto) ResultadoModeracion
+    }
+    class ModeradorPalabras {
+        -set palabras
+        +revisar(texto) ResultadoModeracion
+    }
+    class ModeradorIA {
+        -ModeloIA modelo
+        -RegistroLlamadas registro
+        +armar_prompt(texto) str
+        +leer_respuesta(texto) ResultadoModeracion
+        +revisar(texto) ResultadoModeracion
+    }
+    class ModeloIA {
+        <<interface>>
+        +generar(prompt) RespuestaModelo
+    }
+    class RegistroLlamadas {
+        <<interface>>
+        +registrar(pregunta, tecnica, respuesta, tokens_entrada, tokens_salida, tiempo_ms, estado)
+    }
+    class CsvRegistroLlamadas {
+        -str ruta
+        +registrar(pregunta, tecnica, respuesta, tokens_entrada, tokens_salida, tiempo_ms, estado)
+    }
+    class GeminiClient {
+        -str api_key
+        -str modelo
+        -int timeout_ms
+        -bool respuesta_json
+        -bool sin_razonamiento
+        +generar(prompt) RespuestaModelo
+    }
+
+    Moderador <|.. ModeracionService
+    Moderador <|.. ModeradorPalabras
+    Moderador <|.. ModeradorIA
+    ModeracionService o-- ModeradorPalabras
+    ModeracionService o-- ModeradorIA
+    ModeradorIA --> ModeloIA
+    ModeradorIA --> RegistroLlamadas
+    RegistroLlamadas <|.. CsvRegistroLlamadas
+    ModeloIA <|.. GeminiClient
+    EvaluacionService --> EvaluacionRepository
+    EvaluacionService --> DocenteRepository
+    EvaluacionService --> ReporteRepository
+    EvaluacionService --> CatalogoRepository
+    EvaluacionService --> Moderador
+    ReporteService --> ReporteRepository
+    ReporteService --> EvaluacionRepository
+    DocenteService --> DocenteRepository
+    CuentaService --> UsuarioRepository
+    CuentaService --> Hasher
+    CuentaService --> GestorTokens
+    CuentaService --> EnviadorCorreo
+    EvaluacionRepository <|.. SqlAlchemyEvaluacionRepository
+    ReporteRepository <|.. SqlAlchemyReporteRepository
+    DocenteRepository <|.. SqlAlchemyDocenteRepository
+    CatalogoRepository <|.. SqlAlchemyCatalogoRepository
+    UsuarioRepository <|.. SqlAlchemyUsuarioRepository
+    Hasher <|.. BcryptHasher
+    GestorTokens <|.. JwtTokens
+    EnviadorCorreo <|.. CorreoSmtp
+    EnviadorCorreo <|.. CorreoConsola

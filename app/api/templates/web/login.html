@@ -1,0 +1,57 @@
+{% extends "web/base.html" %}
+{% from "web/_macros.html" import aviso as caja %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+<section class="tarjeta login-caja">
+  <div class="pasos" aria-hidden="true"><span class="hecho"></span><span class="{{ 'hecho' if paso == 2 }}"></span></div>
+
+  {% if paso == 1 %}
+  <div>
+    <h1>Iniciar sesión</h1>
+    <p class="intro">Sin contraseñas. Te enviamos un código de 6 dígitos a tu correo de estudiante. Si es tu primera vez, tu cuenta se crea sola.</p>
+  </div>
+  {% if error %}{{ caja('error', error) }}{% endif %}
+  <form method="post" action="/login">
+    <input type="hidden" name="siguiente" value="{{ siguiente }}">
+    <div>
+      <label class="etiqueta" for="correo">Correo de estudiante</label>
+      <input id="correo" name="correo" class="campo" type="email" autocomplete="email" required
+             value="{{ correo }}" placeholder="nombre@{{ dominios[0] }}" style="height: 48px; font-size: 16px">
+      <p class="ayuda">Solo correos {% for d in dominios %}@{{ d }}{{ ', ' if not loop.last }}{% endfor %}</p>
+    </div>
+    <button class="boton boton-primario" type="submit" style="min-height: 48px">Enviar código</button>
+  </form>
+
+  {% else %}
+  <div>
+    <h1>Revisa tu correo</h1>
+    <p class="intro">Escribe el código que enviamos a <strong style="color: var(--texto)">{{ correo }}</strong>. Vence en {{ minutos }} minutos.</p>
+  </div>
+  {% if codigo_demo %}
+  {{ caja('alerta', 'Modo demo: tu código es ' ~ codigo_demo) }}
+  {% endif %}
+  {% if error %}{{ caja('error', error) }}{% endif %}
+  <form method="post" action="/login/verificar">
+    <input type="hidden" name="correo" value="{{ correo }}">
+    <input type="hidden" name="siguiente" value="{{ siguiente }}">
+    <div>
+      <label class="etiqueta" for="codigo">Código de acceso</label>
+      <input id="codigo" name="codigo" class="campo campo-codigo" inputmode="numeric" autocomplete="one-time-code"
+             pattern="[0-9]{6}" maxlength="6" required placeholder="000000" autofocus>
+    </div>
+    <button class="boton boton-primario" type="submit" style="min-height: 48px">Entrar</button>
+  </form>
+  <div class="enlaces-login">
+    <a class="boton-texto" style="color: var(--azul-enlace); text-decoration: underline" href="/login?siguiente={{ siguiente | urlencode }}">Cambiar correo</a>
+    <form method="post" action="/login">
+      <input type="hidden" name="correo" value="{{ correo }}">
+      <input type="hidden" name="siguiente" value="{{ siguiente }}">
+      <input type="hidden" name="reenvio" value="1">
+      <button class="boton-texto" style="color: var(--azul-enlace); text-decoration: underline" type="submit">Reenviar código</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <p class="pie-login">Tu correo solo se usa para comprobar que eres estudiante de la UMB. Nunca aparece junto a tus evaluaciones (Ley 1581 de 2012). <a href="/privacidad">Cómo tratamos tus datos</a>.</p>
+</section>
+{% endblock %}

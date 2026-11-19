@@ -1,0 +1,82 @@
+{% extends "web/base.html" %}
+{% from "web/_macros.html" import icono_volver, aviso as caja %}
+{% set seccion = 'docentes' %}
+{% block titulo %}{{ 'Editar evaluación' if editando else 'Evaluar a ' ~ docente.nombre }}{% endblock %}
+{% block contenido %}
+<div class="estrecho">
+  {% if editando %}
+  <a class="volver" href="/mis-evaluaciones">{{ icono_volver() }} Volver a mis evaluaciones</a>
+  {% else %}
+  <a class="volver" href="/docentes/{{ docente.id_docente }}">{{ icono_volver() }} Volver al perfil</a>
+  {% endif %}
+
+  <div class="quien-evaluo">
+    <span class="avatar mediano" aria-hidden="true">{{ docente.nombre | iniciales }}</span>
+    <div>
+      <p>{{ 'Editar tu evaluación de' if editando else 'Evaluar a' }}</p>
+      <h1>{{ docente.nombre }}</h1>
+    </div>
+  </div>
+
+  {% if error %}{{ caja('error', error) }}{% endif %}
+  {% if editando and editando.estado == 'en_revision' %}
+  {{ caja('alerta', 'Esta evaluación está en revisión porque podría incumplir las normas. Si corriges el comentario, se vuelve a revisar automáticamente.') }}
+  {% endif %}
+
+  <form class="tarjeta form-evaluacion" method="post"
+        action="{{ '/evaluaciones/%d/editar' % editando.id_evaluacion if editando else '/docentes/%d/evaluar' % docente.id_docente }}">
+    <div>
+      <label class="etiqueta" for="materia">¿En qué materia lo tuviste? <span class="requerido">*</span></label>
+      {% if editando %}
+        <select id="materia" class="campo" disabled>
+          {% for m in docente.materias %}{% if m.id_materia == id_materia %}<option>{{ m.nombre }}</option>{% endif %}{% endfor %}
+        </select>
+        <p class="ayuda">La materia no se puede cambiar. Si te equivocaste, elimina esta evaluación y crea otra.</p>
+      {% else %}
+        <select id="materia" name="id_materia" class="campo" required>
+          <option value="">Selecciona una materia</option>
+          {% for m in docente.materias %}
+          <option value="{{ m.id_materia }}" {{ 'selected' if m.id_materia == id_materia }}>{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+        <p class="ayuda">Solo aparecen las materias que dicta. Puedes evaluarlo una vez por materia.</p>
+      {% endif %}
+    </div>
+
+    <fieldset>
+      <legend>Calificación</legend>
+      <div class="selector-estrellas" data-selector-estrellas>
+        <input type="radio" name="puntaje" value="" id="nota-0" {{ 'checked' if not puntaje }} data-sin-nota>
+        <span class="opciones">
+          {% for i in range(5, 0, -1) %}
+          <input type="radio" name="puntaje" value="{{ i }}" id="nota-{{ i }}" {{ 'checked' if puntaje == i }}>
+          <label class="estrella" for="nota-{{ i }}" data-texto="{{ i }} · {{ etiquetas[i] }}">
+            <span class="oculto-visual">{{ i }} {{ 'estrella' if i == 1 else 'estrellas' }}, {{ etiquetas[i] }}</span>
+            <svg aria-hidden="true" width="38" height="38" viewBox="0 0 24 24" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+          </label>
+          {% endfor %}
+        </span>
+        <span class="texto-nota" data-texto-nota>{{ ('%d · %s' % (puntaje, etiquetas[puntaje])) if puntaje else 'Sin calificación' }}</span>
+        <label for="nota-0" class="boton-texto quitar-nota" style="text-decoration: underline">Quitar calificación</label>
+      </div>
+    </fieldset>
+
+    <div>
+      <label class="etiqueta" for="comentario">Comentario</label>
+      <textarea id="comentario" name="comentario" class="campo" rows="6" maxlength="{{ max_comentario }}"
+                data-contador placeholder="¿Cómo explica? ¿Cómo califica? ¿Qué le recomendarías a quien lo vaya a ver?">{{ comentario }}</textarea>
+      <div style="display: flex; justify-content: space-between; gap: 12px">
+        <p class="ayuda">Mínimo {{ min_comentario }} caracteres. Habla de la clase, no de la persona: los comentarios que incumplen las <a href="/normas" target="_blank">normas de la comunidad</a> quedan en revisión.</p>
+        <p class="ayuda contador" style="white-space: nowrap"><span data-cuenta>{{ comentario | length }}</span> / {{ max_comentario }}</p>
+      </div>
+    </div>
+
+    {{ caja('info', 'Tu evaluación se publica como Estudiante anónimo. Puedes calificar, comentar o hacer ambas cosas, pero al menos una.') }}
+
+    <div class="fila-botones">
+      <a class="boton boton-secundario" href="{{ '/mis-evaluaciones' if editando else '/docentes/%d' % docente.id_docente }}">Cancelar</a>
+      <button class="boton boton-primario" type="submit">{{ 'Guardar cambios' if editando else 'Publicar evaluación' }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

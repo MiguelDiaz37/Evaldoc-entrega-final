@@ -1,0 +1,49 @@
+{% extends "web/base.html" %}
+{% block titulo %}Privacidad{% endblock %}
+{% block contenido %}
+<div class="medio">
+  <div class="titulo-pagina">
+    <h1>Privacidad y tratamiento de datos</h1>
+    <p>EvalDoc solo guarda lo necesario para funcionar, en línea con la Ley 1581 de 2012 de protección de datos personales.</p>
+  </div>
+
+  <article class="tarjeta texto-largo">
+    <h2>Qué datos guardamos</h2>
+    <ul>
+      <li><strong>Tu correo institucional</strong> ({% for d in dominios %}@{{ d }}{{ ', ' if not loop.last }}{% endfor %}), solo para comprobar que eres estudiante de la UMB.</li>
+      <li><strong>Tus evaluaciones</strong>: calificación, comentario, materia y fecha.</li>
+      <li><strong>Tus votos “Útil”</strong> y los <strong>reportes</strong> que hagas.</li>
+      <li>No pedimos nombre, documento, teléfono ni contraseña.</li>
+    </ul>
+
+    <h2>Anonimato</h2>
+    <ul>
+      <li>Tus evaluaciones se muestran como <strong>Estudiante anónimo</strong>. Ni los docentes ni otros estudiantes ven tu correo.</li>
+      <li>La API pública nunca devuelve el correo ni el identificador de quien evaluó o votó.</li>
+      <li>La sesión usa un token que guarda tu identificador interno y tu rol, nunca tu correo.</li>
+    </ul>
+
+    <h2>Seguridad</h2>
+    <ul>
+      <li>No hay contraseñas: inicias sesión con un código de un solo uso que vence en {{ minutos }} minutos.</li>
+      <li>El código se guarda cifrado (bcrypt), sirve una sola vez y se bloquea después de 5 intentos fallidos.</li>
+      <li>Para evitar abusos, solo se puede pedir un código por minuto y máximo 5 por hora.</li>
+      <li>La sesión dura {{ dias }} días y se guarda en una cookie que el JavaScript de la página no puede leer.</li>
+    </ul>
+
+    <h2>Moderación con inteligencia artificial</h2>
+    <ul>
+      <li>Para la revisión automática se envía <strong>solo el texto del comentario</strong> a Google Gemini, sin tu correo ni ningún dato que te identifique.</li>
+      <li>La IA no decide sola: los comentarios marcados siempre los revisa un moderador.</li>
+    </ul>
+
+    <h2>Tus derechos</h2>
+    <ul>
+      <li>Puedes editar o eliminar tus evaluaciones cuando quieras desde <a href="/mis-evaluaciones">Mis evaluaciones</a>.</li>
+      <li>Para pedir que se elimine tu cuenta y todos tus datos, escribe al administrador de la plataforma.</li>
+    </ul>
+
+    <p style="margin-top: 24px"><a class="boton boton-primario" href="/">Volver a docentes</a></p>
+  </article>
+</div>
+{% endblock %}

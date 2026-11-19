@@ -1,0 +1,110 @@
+---
+title: EvalDoc - Diagrama de clases (dominio)
+---
+classDiagram
+    direction LR
+    class Usuario {
+        +int id_usuario
+        +str correo_institucional
+        +str rol
+        +date fecha_registro
+        +es_admin() bool
+    }
+    class CodigoOtp {
+        +int id_codigo
+        +str codigo_hash
+        +datetime creado
+        +datetime expira
+        +int intentos
+        +bool usado
+        +vigente(ahora) bool
+    }
+    class Sesion {
+        +int id_usuario
+        +str rol
+        +es_admin() bool
+    }
+    class Facultad {
+        +int id_facultad
+        +str nombre
+    }
+    class Materia {
+        +int id_materia
+        +str nombre
+        +int id_facultad
+        +str nombre_facultad
+    }
+    class Docente {
+        +int id_docente
+        +str nombre
+        +str foto_perfil
+        +/float calificacion_promedio
+        +/int total_calificaciones
+        +/dict distribucion
+        +publicadas() list~Evaluacion~
+        +dicta(id_materia) bool
+        +puede_eliminarse() bool
+    }
+    class Evaluacion {
+        +int id_evaluacion
+        +int puntaje [0..1]
+        +str comentario [0..1]
+        +date fecha
+        +str estado
+        +datetime fecha_edicion [0..1]
+        +/int utiles
+        +validar()
+        +actualizar(puntaje, comentario, ahora) bool
+        +aplicar_moderacion(resultado)
+        +es_de(id_usuario) bool
+    }
+    class Reporte {
+        +int id_reporte
+        +str categoria
+        +str origen
+        +str motivo
+        +str estado
+        +date fecha
+        +int resuelto_por [0..1]
+        +datetime fecha_resolucion [0..1]
+        +cerrar(estado, ahora, id_moderador)
+    }
+    class VotoUtil {
+        <<tabla de asociación>>
+        +int id_usuario
+        +int id_evaluacion
+        +datetime fecha
+    }
+    class ResultadoModeracion {
+        <<value object>>
+        +str veredicto
+        +str motivo
+    }
+    class EstadoEvaluacion {
+        <<enumeration>>
+        publicada
+        en_revision
+        oculta
+    }
+    class Veredicto {
+        <<enumeration>>
+        permitido
+        dudoso
+        bloqueado
+    }
+
+    Usuario "1" --> "0..*" CodigoOtp : solicita
+    Usuario "1" --> "0..*" Evaluacion : escribe
+    Usuario "1" --> "0..*" Reporte : reporta
+    Usuario "0..1" --> "0..*" Reporte : resuelve (moderador)
+    Usuario "1" --> "0..*" VotoUtil : vota
+    Evaluacion "1" --> "0..*" VotoUtil : recibe
+    Evaluacion "1" --> "0..*" Reporte : tiene
+    Docente "1" --> "0..*" Evaluacion : recibe
+    Materia "1" --> "0..*" Evaluacion : contexto
+    Docente "0..*" -- "1..*" Materia : dicta
+    Facultad "1" --> "1..*" Materia : agrupa
+    Evaluacion ..> ResultadoModeracion : usa
+    Evaluacion ..> EstadoEvaluacion
+    ResultadoModeracion ..> Veredicto
+    Sesion ..> Usuario : identifica

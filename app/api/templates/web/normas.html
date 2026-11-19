@@ -1,0 +1,55 @@
+{% extends "web/base.html" %}
+{% block titulo %}Normas de la comunidad{% endblock %}
+{% block contenido %}
+<div class="medio">
+  <div class="titulo-pagina">
+    <h1>Normas de la comunidad</h1>
+    <p>EvalDoc existe para que los estudiantes compartan cómo les fue con un docente y otros puedan decidir mejor. Estas normas mantienen las opiniones útiles y respetuosas.</p>
+  </div>
+
+  <article class="tarjeta texto-largo">
+    <h2>Qué se puede publicar</h2>
+    <div class="si-no">
+      <div class="si">
+        <h3>Sí</h3>
+        <ul>
+          <li>Opiniones sobre la clase: cómo explica, cómo evalúa, cómo organiza el curso.</li>
+          <li>Críticas, incluso duras, si hablan de la clase y no de la persona.</li>
+          <li>Recomendaciones para quien vaya a ver la materia.</li>
+          <li>Experiencias concretas: entregas, tiempos de calificación, atención a dudas.</li>
+        </ul>
+      </div>
+      <div class="no">
+        <h3>No</h3>
+        <ul>
+          <li>Insultos, groserías o burlas contra el docente u otros estudiantes.</li>
+          <li>Comentarios discriminatorios, amenazas o acoso.</li>
+          <li>Datos personales: teléfono, dirección, redes sociales o vida privada.</li>
+          <li>Publicidad, spam o texto que no tenga que ver con el docente.</li>
+          <li>Información que sepas que es falsa.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Reglas de uso</h2>
+    <ul>
+      <li>Solo pueden participar estudiantes con correo institucional de la UMB.</li>
+      <li>Puedes evaluar a cada docente <strong>una vez por materia</strong>. Si cambias de opinión, edita tu evaluación; quedará marcada como “editado”.</li>
+      <li>Tus evaluaciones se publican como <strong>Estudiante anónimo</strong>.</li>
+      <li>El botón <strong>Útil</strong> se puede marcar una vez por evaluación y no en las propias.</li>
+    </ul>
+
+    <h2>Cómo se moderan los comentarios</h2>
+    <ul>
+      <li>Antes de publicarse, cada comentario pasa por una <strong>revisión automática</strong>: una lista de palabras ofensivas y un modelo de inteligencia artificial.</li>
+      <li>Si el comentario parece ofensivo, queda <strong>en revisión</strong>: no se muestra hasta que un moderador lo revise. Si lo corriges, se vuelve a revisar automáticamente.</li>
+      <li>Si hay dudas, se publica, pero un moderador lo revisa después.</li>
+      <li>Cualquier estudiante puede <strong>reportar</strong> una evaluación explicando la razón.</li>
+      <li>La decisión final siempre la toma un <strong>moderador humano</strong>: publica la evaluación o la oculta. Nada se borra; las evaluaciones ocultas quedan en el historial.</li>
+      <li>La revisión automática se puede equivocar. Si crees que tu evaluación quedó en revisión por error, edítala para dejar más claro que hablas de la clase.</li>
+    </ul>
+
+    <p style="margin-top: 24px"><a class="boton boton-primario" href="/">Volver a docentes</a></p>
+  </article>
+</div>
+{% endblock %}
